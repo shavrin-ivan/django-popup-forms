@@ -190,14 +190,17 @@ class PopupFormNode(template.Node):
         # Django tries to call callables, so we extract
         # form class from the form instance
         if not isinstance(form_class, type):
-            form_class = form_class.__class__
-        form_instance = form_class(**kwargs)
+            form_instance = form_class
+        else:
+            form_instance = form_class(**kwargs)
 
         # Try to get popup_form from session
         # (emulate response to POST request for popup form)
         hide_form = True  # Hide form by default, unless form is in session
         request = context['request']
         if 'popup_form' in request.session:
+            if not isinstance(form_class, type):
+                form_class = form_class.__class__
             action, data, errors = request.session['popup_form']
 
             # A page could have many popup forms,

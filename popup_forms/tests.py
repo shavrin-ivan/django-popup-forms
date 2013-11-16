@@ -36,6 +36,12 @@ def index(request):
 def render_form(request):
     return render(request, 'popup_forms_test/page.html')
 
+def render_form_with_initials(request):
+    form = PopupForm(initial={u'name':u'David', u'email': u'avsd05@gmail.com'})
+    context = {
+        'form': form
+    }
+    return render(request, 'popup_forms_test/page_with_initials.html', context)
 
 @popup_forms.handler
 def process_form(request):
@@ -55,6 +61,7 @@ def success(request):
 urlpatterns = patterns('',
     url(r'^$', index, name='index'),
     url(r'^render_form/$', render_form, name='render_form'),
+    url(r'^render_form_with_initials/$', render_form_with_initials, name='render_form_with_initials'),
     url(r'^process_form/$', process_form, name='process_form'),
     url(r'^success/$', success, name='success'),
 )
@@ -76,6 +83,16 @@ class TestPopupForm(test.TestCase):
                             'name="name" maxlength="10" />')
         self.assertContains(response, '<input id="id_email" type="text" '
                             'name="email" maxlength="20" />')
+
+    def test_render_form_with_initials(self):
+        """Form should be rendered with initials (form instance passed to popup_form template tags)"""
+        response = self.client.get('/render_form_with_initials/')
+        self.assertContains(response, '<form method="post" action="/process_form/">')
+        self.assertContains(response, '<input id="id_name" type="text" '
+                            'name="name" value="David" maxlength="10" />')
+        self.assertContains(response, '<input id="id_email" type="text" '
+                            'name="email" value="avsd05@gmail.com" maxlength="20" />')
+
 
     @skip('TODO: Write test!')
     def test_render_form_kwargs(self):
